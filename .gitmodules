@@ -1,0 +1,9 @@
+[submodule "3rdlibs/spdlog"]
+	path = 3rdlibs/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "3rdlibs/GLFW"]
+	path = 3rdlibs/GLFW
+	url = https://github.com/glfw/glfw.git
+[submodule "3rdlibs/imgui"]
+	path = 3rdlibs/imgui
+	url = https://github.com/ocornut/imgui.git
