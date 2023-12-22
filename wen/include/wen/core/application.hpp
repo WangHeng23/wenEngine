@@ -4,6 +4,8 @@
 #include "wen/events/applicationEvent.hpp"
 #include "wen/core/layerStack.hpp"
 #include "wen/imgui/imguiLayer.hpp"
+#include "wen/renderer/shader.hpp"
+#include "wen/renderer/vertexArray.hpp"
 
 namespace wen {
 class application {
@@ -31,6 +33,10 @@ private:
     layerStack m_LayerStack;
     static application* s_Instance;
     imguiLayer* m_imguiLayer;
+    std::shared_ptr<shader> m_Shader;
+    std::shared_ptr<vertexArray> m_VertexArray;
+    std::shared_ptr<shader> m_BlueShader;
+    std::shared_ptr<vertexArray> m_SquareVA;
 };
 
 application* CreateApplication();

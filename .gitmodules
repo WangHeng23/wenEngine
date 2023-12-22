@@ -7,3 +7,6 @@
 [submodule "3rdlibs/imgui"]
 	path = 3rdlibs/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "3rdlibs/glm"]
+	path = 3rdlibs/glm
+	url = https://github.com/g-truc/glm

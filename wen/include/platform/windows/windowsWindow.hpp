@@ -1,6 +1,7 @@
 #pragma once
 
 #include "wen/core/window.hpp"
+#include "wen/renderer/graphicsContext.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -31,6 +32,7 @@ private:
 
 private:
     GLFWwindow *m_Window;
+    graphicsContext* m_Context;
 
     struct windowData {
         std::string title;

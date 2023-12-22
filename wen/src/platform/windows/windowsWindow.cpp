@@ -2,6 +2,7 @@
 #include "wen/events/applicationEvent.hpp"
 #include "wen/events/keyEvent.hpp"
 #include "wen/events/mouseEvent.hpp"
+#include "platform/opengl/openglContext.hpp"
 
 namespace wen {
 static uint8_t s_GLFWWindowCount = 0;
@@ -44,7 +45,8 @@ void windowsWindow::init(const windowProps &props) {
 
     s_GLFWWindowCount++;
 
-    glfwMakeContextCurrent(m_Window);
+    m_Context = new openglContext(m_Window);
+    m_Context->Init();
     glfwSetWindowUserPointer(m_Window, &m_Data);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         WEN_CORE_INFO("Could not initialize Glad!");
@@ -138,7 +140,7 @@ void windowsWindow::shutdown() {
 
 void windowsWindow::onUpdate() {
     glfwPollEvents();
-    glfwSwapBuffers(m_Window);
+    m_Context->SwapBuffers();
 }
 
 void windowsWindow::setVSync(bool enabled) {

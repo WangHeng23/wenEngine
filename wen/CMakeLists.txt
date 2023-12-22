@@ -1,6 +1,8 @@
 aux_source_directory(./src/wen/core SRC)
 aux_source_directory(./src/wen/imgui SRC)
+aux_source_directory(./src/wen/renderer SRC)
 aux_source_directory(./src/platform/windows SRC)
+aux_source_directory(./src/platform/opengl SRC)
 # message(STATUS "wen src: ${SRC}")
 
 file(GLOB_RECURSE HEADERS "./include/*.hpp")
@@ -19,7 +21,7 @@ set(SRC_LIST_IMGUI_BACKENDS
 
 add_library(wen STATIC ${SRC} ${HEADERS} ${SRC_LIST_IMGUI} ${SRC_LIST_IMGUI_BACKENDS})
 
-target_link_libraries(wen PUBLIC glfw glad)
+target_link_libraries(wen PUBLIC glfw glad glm)
 
 target_include_directories(wen PUBLIC ./include
                                       ${CMAKE_SOURCE_DIR}/3rdlibs/spdlog/include
