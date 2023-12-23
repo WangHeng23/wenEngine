@@ -41,8 +41,7 @@ void openglVertexArray::unbind() const {
     glBindVertexArray(0);
 }
 
-void openglVertexArray::addVertexBuffer(
-    const std::shared_ptr<vertexBuffer> &vertexBuffer) {
+void openglVertexArray::addVertexBuffer(const Ref<vertexBuffer> &vertexBuffer) {
     WEN_CORE_ASSERT(vertexBuffer->getLayout().getElements().size(),
                     "Vertex Buffer has no layout!");
 
@@ -63,8 +62,7 @@ void openglVertexArray::addVertexBuffer(
     m_VertexBuffers.push_back(vertexBuffer);
 }
 
-void openglVertexArray::setIndexBuffer(
-    std::shared_ptr<indexBuffer> &indexBuffer) {
+void openglVertexArray::setIndexBuffer(Ref<indexBuffer> &indexBuffer) {
     glBindVertexArray(m_RendererID);
     indexBuffer->bind();
 

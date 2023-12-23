@@ -19,13 +19,18 @@ set(SRC_LIST_IMGUI_BACKENDS
 )
 ##############################
 
-add_library(wen STATIC ${SRC} ${HEADERS} ${SRC_LIST_IMGUI} ${SRC_LIST_IMGUI_BACKENDS})
+############stb_image########
+file(GLOB SRC_LIST_STB_IMAGE ${CMAKE_SOURCE_DIR}/3rdlibs/stb_image/*.cpp vendor/stb_image/*.h)
+##############################
+
+add_library(wen STATIC ${SRC} ${HEADERS} ${SRC_LIST_IMGUI} ${SRC_LIST_IMGUI_BACKENDS} ${SRC_LIST_STB_IMAGE})
 
 target_link_libraries(wen PUBLIC glfw glad glm)
 
 target_include_directories(wen PUBLIC ./include
                                       ${CMAKE_SOURCE_DIR}/3rdlibs/spdlog/include
                                       ${CMAKE_SOURCE_DIR}/3rdlibs/imgui
-                                      ${CMAKE_SOURCE_DIR}/3rdlibs/imgui/backends)
+                                      ${CMAKE_SOURCE_DIR}/3rdlibs/imgui/backends
+                                      ${CMAKE_SOURCE_DIR}/3rdlibs/stb_image)
 
 target_precompile_headers(wen PUBLIC ./include/pch.hpp)

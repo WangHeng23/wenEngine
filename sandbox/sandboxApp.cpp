@@ -1,9 +1,11 @@
 #include "exampleLayer.hpp"
+#include "sandbox2d.hpp"
 
 class snadboxApp : public wen::application {
 public:
     snadboxApp() { 
-        pushLayer(new exampleLayer()); 
+        // pushLayer(new exampleLayer()); 
+        pushOverlay(new sandbox2d());
     }
 
     ~snadboxApp() {}

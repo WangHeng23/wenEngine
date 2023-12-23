@@ -3,6 +3,7 @@
 #include <memory>   
 
 #include "wen/renderer/buffer.hpp"
+#include "wen/core/base.hpp"
 
 namespace wen {
 class vertexArray {
@@ -12,12 +13,12 @@ public:
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
 
-    virtual void addVertexBuffer(const std::shared_ptr<vertexBuffer> &vertexBuffer) = 0;
-    virtual void setIndexBuffer(std::shared_ptr<indexBuffer> &indexBuffer) = 0;
+    virtual void addVertexBuffer(const Ref<vertexBuffer> &vertexBuffer) = 0;
+    virtual void setIndexBuffer(Ref<indexBuffer> &indexBuffer) = 0;
 
-    virtual const std::vector<std::shared_ptr<vertexBuffer>> &getVertexBuffers() const = 0;
-    virtual const std::shared_ptr<indexBuffer> &getIndexBuffer() const = 0;
+    virtual const std::vector<Ref<vertexBuffer>> &getVertexBuffers() const = 0;
+    virtual const Ref<indexBuffer> &getIndexBuffer() const = 0;
 
-    static vertexArray *create();
+    static Ref<vertexArray> create();
 };
-}
+}  // namespace wen

@@ -29,6 +29,11 @@ public:
 
     virtual void *getNativeWindow() const = 0;
 
+    virtual void getPixelSize(uint32_t &width, uint32_t &height) const {
+        width = getWidth();
+        height = getHeight();
+    }
+
     static window *create(const windowProps &props = windowProps());
 };
 }  // namespace wen

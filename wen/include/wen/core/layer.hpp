@@ -1,5 +1,6 @@
 #pragma once
 #include "wen/events/event.hpp"
+#include "wen/core/timeStep.hpp"
 
 namespace wen {
 class layer {
@@ -14,7 +15,7 @@ public:
     virtual void OnDetach() {}
 
     // Called when the layer is updated
-    virtual void OnUpdate() {}
+    virtual void OnUpdate(timeStep ts) {}
 
     // Called when the layer is updated
     virtual void OnImGuiRender() {}

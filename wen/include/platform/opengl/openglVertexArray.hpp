@@ -1,6 +1,7 @@
 #pragma once
 
 #include "wen/renderer/vertexArray.hpp"
+#include "wen/core/base.hpp"
 #include <cstdint>
 
 namespace wen {
@@ -12,24 +13,21 @@ public:
     virtual void bind() const override;
     virtual void unbind() const override;
 
-    virtual void addVertexBuffer(
-        const std::shared_ptr<vertexBuffer> &vertexBuffer) override;
-    virtual void setIndexBuffer(
-    std::shared_ptr<indexBuffer> &indexBuffer) override;
+    virtual void addVertexBuffer(const Ref<vertexBuffer> &vertexBuffer) override;
+    virtual void setIndexBuffer(Ref<indexBuffer> &indexBuffer) override;
 
-    virtual const std::vector<std::shared_ptr<vertexBuffer>> &getVertexBuffers()
+    virtual const std::vector<Ref<vertexBuffer>> &getVertexBuffers()
         const override {
         return m_VertexBuffers;
     }
 
-    virtual const std::shared_ptr<indexBuffer> &getIndexBuffer()
-        const override {
+    virtual const Ref<indexBuffer> &getIndexBuffer() const override {
         return m_IndexBuffer;
     }
 
 private:
     uint32_t m_RendererID;
-    std::vector<std::shared_ptr<vertexBuffer>> m_VertexBuffers;
-    std::shared_ptr<indexBuffer> m_IndexBuffer;
+    std::vector<Ref<vertexBuffer>> m_VertexBuffers;
+    Ref<indexBuffer> m_IndexBuffer;
 };
 }  // namespace wen
