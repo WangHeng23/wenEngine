@@ -9,11 +9,13 @@
 #include <GLFW/glfw3.h>
 
 #include "wen/core/application.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 namespace wen {
 imguiLayer::imguiLayer() : layer("imguiLayer") {}
 
 void imguiLayer::OnAttach() {
+    WEN_PROFILE_FUNCTION();
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -37,18 +39,21 @@ void imguiLayer::OnAttach() {
 }
 
 void imguiLayer::OnDetach() {
+    WEN_PROFILE_FUNCTION();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
 void imguiLayer::begin() {
+    WEN_PROFILE_FUNCTION();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 }
 
 void imguiLayer::end() {
+    WEN_PROFILE_FUNCTION();
     ImGuiIO &io = ImGui::GetIO();
     application &app = application::get();
     io.DisplaySize = ImVec2((float)app.getWindow().getWidth(),
@@ -65,8 +70,8 @@ void imguiLayer::end() {
     }
 }
 
-void imguiLayer::OnImGuiRender() {
-    static bool show = true;
-    ImGui::ShowDemoWindow(&show);
-}
+// void imguiLayer::OnImGuiRender() {
+//     static bool show = true;
+//     ImGui::ShowDemoWindow(&show);
+// }
 }  // namespace wen

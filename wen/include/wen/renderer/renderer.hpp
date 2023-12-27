@@ -8,6 +8,7 @@ namespace wen {
 class renderer {
 public:
     static void init();
+    static void shutdown();
     static void beginScene(orthographicCamera &camera);
     static void endScene();
 

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "platform/opengl/openglShader.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -18,6 +19,7 @@ static GLenum shaderTypeFromString(const std::string &type) {
 }
 
 openglShader::openglShader(const std::string &filepath) {
+    WEN_PROFILE_FUNCTION();
     std::string source = readFile(filepath);
     auto ShaderSources = preProcess(source);
     compile(ShaderSources);
@@ -33,6 +35,7 @@ openglShader::openglShader(const std::string &name,
                            const std::string &vertexSrc,
                            const std::string &fragmentSrc)
     : m_Name(name) {
+    WEN_PROFILE_FUNCTION();
     std::unordered_map<GLenum, std::string> sources;
     sources[GL_VERTEX_SHADER] = vertexSrc;
     sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -40,18 +43,22 @@ openglShader::openglShader(const std::string &name,
 }
 
 openglShader::~openglShader() {
+    WEN_PROFILE_FUNCTION();
     glDeleteProgram(m_RendererID);
 }
 
 void openglShader::bind() const {
+    WEN_PROFILE_FUNCTION();
     glUseProgram(m_RendererID);
 }
 
 void openglShader::unbind() const {
+    WEN_PROFILE_FUNCTION();
     glUseProgram(0);
 }
 
 std::string openglShader::readFile(const std::string &filepath) {
+    WEN_PROFILE_FUNCTION();
     std::string result;
     std::ifstream in(filepath, std::ios::in | std::ios::binary);
     if (in) {
@@ -73,6 +80,7 @@ std::string openglShader::readFile(const std::string &filepath) {
 
 std::unordered_map<GLenum, std::string> openglShader::preProcess(
     const std::string &source) {
+    WEN_PROFILE_FUNCTION();
     std::unordered_map<GLenum, std::string> shaderSources;
     const char *typeToken = "#type";
     size_t typeTokenLength = strlen(typeToken);
@@ -97,6 +105,7 @@ std::unordered_map<GLenum, std::string> openglShader::preProcess(
 
 void openglShader::compile(
     const std::unordered_map<GLenum, std::string> &shaderSources) {
+    WEN_PROFILE_FUNCTION();
     GLuint program = glCreateProgram();
     WEN_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders");
     std::array<GLenum, 2> glShaderIDs;
@@ -194,18 +203,27 @@ void openglShader::uploadUniformMat4(const std::string &name,
 }
 
 void openglShader::setInt(const std::string &name, const int value) {
+    WEN_PROFILE_FUNCTION();
     uploadUniformInt(name, value);
 }
 
+void openglShader::setFloat(const std::string &name, const float value) {
+    WEN_PROFILE_FUNCTION();
+    uploadUniformFloat(name, value);
+}
+
 void openglShader::setFloat3(const std::string &name, const glm::vec3 &value) {
+    WEN_PROFILE_FUNCTION();
     uploadUniformFloat3(name, value);
 }
 
 void openglShader::setFloat4(const std::string &name, const glm::vec4 &value) {
+    WEN_PROFILE_FUNCTION();
     uploadUniformFloat4(name, value);
 }
 
 void openglShader::setMat4(const std::string &name, const glm::mat4 &value) {
+    WEN_PROFILE_FUNCTION();
     uploadUniformMat4(name, value);
 }
 }  // namespace wen

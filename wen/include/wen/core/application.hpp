@@ -6,6 +6,8 @@
 #include "wen/imgui/imguiLayer.hpp"
 #include "wen/core/base.hpp"
 
+int main(int argc, char** argv);
+
 namespace wen {
 class application {
 public:
@@ -13,7 +15,6 @@ public:
     virtual ~application();
 
     void onEvent(event& e);
-    void Run();
 
     void pushLayer(layer* layer);
     void pushOverlay(layer* overlay);
@@ -25,6 +26,7 @@ public:
 private:
     bool onWindowClose(windowCloseEvent& e);
     bool onWindowResize(windowResizeEvent& e);
+    void Run();
 
 private:
     Scope<window> m_Window;
@@ -36,6 +38,7 @@ private:
 
 private:
     static application* s_Instance;
+    friend int ::main(int argc, char** argv);
 };
 
 application* CreateApplication();

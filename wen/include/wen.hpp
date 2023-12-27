@@ -23,5 +23,7 @@
 #include "wen/renderer/orthographicCameraController.hpp"
 #include "wen/renderer/renderer2D.hpp"
 
+#include "wen/debug/instrumentor.hpp"
+
 
 #include <imgui.h>

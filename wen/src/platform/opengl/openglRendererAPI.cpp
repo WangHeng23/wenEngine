@@ -1,4 +1,5 @@
 #include "platform/opengl/openglRendererAPI.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include <glad/glad.h>
 
@@ -18,6 +19,7 @@ void openglRendererAPI::drawIndexed(
 }
 
 void openglRendererAPI::init() {
+    WEN_PROFILE_FUNCTION();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);

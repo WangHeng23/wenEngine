@@ -8,8 +8,8 @@
 namespace wen {
 class windowsWindow : public window {
 public:
-    windowsWindow(const windowProps &props);
-    virtual ~windowsWindow();
+    explicit windowsWindow(const windowProps &props);
+    ~windowsWindow() override;
 
     void onUpdate() override;
 

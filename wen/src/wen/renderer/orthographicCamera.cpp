@@ -1,4 +1,5 @@
 #include "wen/renderer/orthographicCamera.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -7,15 +8,19 @@ orthographicCamera::orthographicCamera(float left, float right, float bottom,
                                        float top)
     : m_ProjectionMatrix(glm::ortho(left, right, bottom, top, -1.0f, 1.0f)),
       m_ViewMatrix(1.0f),
-      m_ViewProjectionMatrix(m_ProjectionMatrix * m_ViewMatrix) {}
+      m_ViewProjectionMatrix(m_ProjectionMatrix * m_ViewMatrix) {
+    WEN_PROFILE_FUNCTION();
+}
 
 void orthographicCamera::setProjection(float left, float right, float bottom,
                                        float top) {
+    WEN_PROFILE_FUNCTION();
     m_ProjectionMatrix = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
     m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 }
 
 void orthographicCamera::recalculateViewMatrix() {
+    WEN_PROFILE_FUNCTION();
     glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position) *
                           glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation),
                                       glm::vec3(0, 0, 1));

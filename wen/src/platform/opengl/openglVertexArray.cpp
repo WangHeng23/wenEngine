@@ -1,4 +1,5 @@
 #include "platform/opengl/OpenGLVertexArray.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include <glad/glad.h>
 
@@ -26,22 +27,27 @@ static GLenum shaderDataTypeToOpenGLBaseType(shaderDataType type) {
 }
 
 openglVertexArray::openglVertexArray() {
+    WEN_PROFILE_FUNCTION();
     glGenVertexArrays(1, &m_RendererID);
 }
 
 openglVertexArray::~openglVertexArray() {
+    WEN_PROFILE_FUNCTION();
     glDeleteVertexArrays(1, &m_RendererID);
 }
 
 void openglVertexArray::bind() const {
+    WEN_PROFILE_FUNCTION();
     glBindVertexArray(m_RendererID);
 }
 
 void openglVertexArray::unbind() const {
+    WEN_PROFILE_FUNCTION();
     glBindVertexArray(0);
 }
 
 void openglVertexArray::addVertexBuffer(const Ref<vertexBuffer> &vertexBuffer) {
+    WEN_PROFILE_FUNCTION();
     WEN_CORE_ASSERT(vertexBuffer->getLayout().getElements().size(),
                     "Vertex Buffer has no layout!");
 
@@ -63,6 +69,7 @@ void openglVertexArray::addVertexBuffer(const Ref<vertexBuffer> &vertexBuffer) {
 }
 
 void openglVertexArray::setIndexBuffer(Ref<indexBuffer> &indexBuffer) {
+    WEN_PROFILE_FUNCTION();
     glBindVertexArray(m_RendererID);
     indexBuffer->bind();
 

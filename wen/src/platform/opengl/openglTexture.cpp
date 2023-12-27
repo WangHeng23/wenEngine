@@ -1,10 +1,12 @@
 #include "platform/opengl/openglTexture.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include "stb_image.h"
 #include <glad/glad.h>
 
 namespace wen {
 openglTexture2D::openglTexture2D(const std::string &path) : m_Path(path) {
+    WEN_PROFILE_FUNCTION();
     int width, height, channels;
     stbi_set_flip_vertically_on_load(1);
     stbi_uc *data = nullptr;
@@ -36,6 +38,7 @@ openglTexture2D::openglTexture2D(const std::string &path) : m_Path(path) {
 
 openglTexture2D::openglTexture2D(uint32_t w, uint32_t h)
     : m_Width(w), m_Height(h) {
+    WEN_PROFILE_FUNCTION();
     m_InternalFormat = GL_RGBA8;
     m_DataFormat = GL_RGBA;
     
@@ -51,15 +54,18 @@ openglTexture2D::openglTexture2D(uint32_t w, uint32_t h)
 }
 
 openglTexture2D::~openglTexture2D() {
+    WEN_PROFILE_FUNCTION();
     glDeleteTextures(1, &m_RendererID);
 }
 
 void openglTexture2D::bind(uint32_t slot) const {
+    WEN_PROFILE_FUNCTION();
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, m_RendererID);
 }
 
 void openglTexture2D::setData(void *data, uint32_t size) {
+    WEN_PROFILE_FUNCTION();
     uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
     WEN_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire");
 

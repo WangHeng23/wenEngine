@@ -2,12 +2,14 @@
 #include "wen/renderer/renderer2D.hpp"
 #include "wen/renderer/renderCommand.hpp"
 #include "platform/opengl/openglShader.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 namespace wen {
 renderer::sceneData* renderer::m_SceneData = new renderer::sceneData;
 
-void renderer::init() { 
-    renderCommand::init(); 
+void renderer::init() {
+    WEN_PROFILE_FUNCTION();
+    renderCommand::init();
     renderer2D::init();
 }
 
@@ -31,5 +33,9 @@ void renderer::submit(const Ref<shader>& shader,
 
 void renderer::onWindowResize(uint32_t width, uint32_t height) {
     renderCommand::setViewport(0, 0, width, height);
+}
+
+void renderer::shutdown() {
+    renderer2D::shutdown();
 }
 }  // namespace wen

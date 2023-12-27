@@ -3,6 +3,7 @@
 #include "wen/core/input.hpp"
 #include "wen/core/keyCodes.hpp"
 #include "wen/renderer/orthographicCameraController.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 namespace wen {
 orthographicCameraController::orthographicCameraController(float aspectRatio,
@@ -13,6 +14,7 @@ orthographicCameraController::orthographicCameraController(float aspectRatio,
       m_Rotation(rotation) {}
 
 void orthographicCameraController::onUpdate(timeStep ts) {
+    WEN_PROFILE_FUNCTION();
     if (input::IsKeyPressed(WEN_KEY_A)) {
         m_CameraPosition.x -=
             cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
@@ -59,6 +61,7 @@ void orthographicCameraController::onUpdate(timeStep ts) {
 }
 
 void orthographicCameraController::onEvent(event& e) {
+    WEN_PROFILE_FUNCTION();
     eventDispatcher dispatcher(e);
     dispatcher.dispatch<mouseScrolledEvent>(
         BIND_EVENT_FN(orthographicCameraController::onMouseScrolled));
@@ -67,6 +70,7 @@ void orthographicCameraController::onEvent(event& e) {
 }
 
 void orthographicCameraController::onResize(float width, float height) {
+    WEN_PROFILE_FUNCTION();
     m_AspectRatio = width / height;
     m_Camera.setProjection(-m_AspectRatio * m_ZoomLevel,
                            m_AspectRatio * m_ZoomLevel, -m_ZoomLevel,
@@ -74,6 +78,7 @@ void orthographicCameraController::onResize(float width, float height) {
 }
 
 bool orthographicCameraController::onMouseScrolled(mouseScrolledEvent& e) {
+    WEN_PROFILE_FUNCTION();
     m_ZoomLevel -= e.getYOffset() * 0.25f;
     m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
     m_Camera.setProjection(-m_AspectRatio * m_ZoomLevel,
@@ -83,6 +88,7 @@ bool orthographicCameraController::onMouseScrolled(mouseScrolledEvent& e) {
 }
 
 bool orthographicCameraController::onWindowResized(windowResizeEvent& e) {
+    WEN_PROFILE_FUNCTION();
     onResize((float)e.getWidth(), (float)e.getHeight());
     return false;
 }

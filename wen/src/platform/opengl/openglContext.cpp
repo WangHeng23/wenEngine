@@ -1,5 +1,6 @@
 #include "platform/opengl/openglContext.hpp"
 #include "wen/core/base.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +12,7 @@ openglContext::openglContext(GLFWwindow* windowHandle)
 }
 
 void openglContext::Init() {
+    WEN_PROFILE_FUNCTION();
     glfwMakeContextCurrent(m_windowHandle);
     int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     WEN_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -22,6 +24,7 @@ void openglContext::Init() {
 }
 
 void openglContext::SwapBuffers() {
+    WEN_PROFILE_FUNCTION();
     glfwSwapBuffers(m_windowHandle);
 }
 }  // namespace wen

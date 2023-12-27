@@ -3,13 +3,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-#include <platform/opengl/openglShader.hpp>
 
 sandbox2d::sandbox2d()
     : layer("sandbox2d"), m_cameraController(1600.f / 900.f, true) {}
 
 void sandbox2d::OnAttach() {
-    m_Texture = wen::texture2D::create("sandbox/assets/textures/Checkerboard.png");
+    WEN_PROFILE_FUNCTION();
+    m_Texture =
+        wen::texture2D::create("sandbox/assets/textures/Checkerboard.png");
     m_SquareVA = wen::vertexArray::create();
 
     float squareVertices[5 * 4] = {
@@ -28,24 +29,36 @@ void sandbox2d::OnAttach() {
         squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
     m_SquareVA->setIndexBuffer(squareIB);
 
-    m_FlatColorShader = wen::shader::create("sandbox/assets/shaders/FlatColor.glsl");
+    m_FlatColorShader =
+        wen::shader::create("sandbox/assets/shaders/FlatColor.glsl");
 }
 
-void sandbox2d::OnDetach() {}
+void sandbox2d::OnDetach() {
+    WEN_PROFILE_FUNCTION();
+}
 
 void sandbox2d::OnUpdate(wen::timeStep ts) {
     // Update
     m_cameraController.onUpdate(ts);
 
     // Render
-    wen::renderCommand::setClearColor({0.1f, 0.1f, 0.1f, 1});
-    wen::renderCommand::clear();
+    {
+        WEN_PROFILE_SCOPE("renderer prep");
+        wen::renderCommand::setClearColor({0.1f, 0.1f, 0.1f, 1});
+        wen::renderCommand::clear();
+    }
 
-    wen::renderer2D::beginScene(m_cameraController.getCamera());
-    wen::renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, m_SquareColor);
-    wen::renderer2D::drawQuad({0.5f, 0.0f}, {1.0f, 1.0f}, {0.8f, 0.2f, 0.3f, 1.0f});
-    wen::renderer2D::drawQuad({0.0f, 0.0f, -0.1f}, {5.0f, 5.0f}, m_Texture);
-    wen::renderer2D::endScene();
+    {
+        WEN_PROFILE_SCOPE("renderer draw");
+        wen::renderer2D::beginScene(m_cameraController.getCamera());
+        wen::renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f},
+                                  glm::radians(-45.0f), m_SquareColor);
+        wen::renderer2D::drawQuad({0.5f, 0.0f}, {1.0f, 1.0f},
+                                  {0.8f, 0.2f, 0.3f, 1.0f});
+        wen::renderer2D::drawQuad({0.0f, 0.0f, -0.1f}, {5.0f, 5.0f}, m_Texture,
+                                  10.0f);
+        wen::renderer2D::endScene();
+    }
 }
 
 void sandbox2d::OnImGuiRender() {

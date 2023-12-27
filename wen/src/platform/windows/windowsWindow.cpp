@@ -3,6 +3,7 @@
 #include "wen/events/keyEvent.hpp"
 #include "wen/events/mouseEvent.hpp"
 #include "platform/opengl/openglContext.hpp"
+#include "wen/debug/instrumentor.hpp"
 
 namespace wen {
 static uint8_t s_GLFWWindowCount = 0;
@@ -16,14 +17,17 @@ window *window::create(const windowProps &props) {
 }
 
 windowsWindow::windowsWindow(const windowProps &props) {
+    WEN_PROFILE_FUNCTION();
     init(props);
 }
 
 windowsWindow::~windowsWindow() {
+    WEN_PROFILE_FUNCTION();
     shutdown();
 }
 
 void windowsWindow::init(const windowProps &props) {
+    WEN_PROFILE_FUNCTION();
     m_Data.title = props.title;
     m_Data.width = props.width;
     m_Data.height = props.height;
@@ -33,15 +37,15 @@ void windowsWindow::init(const windowProps &props) {
 
     if (s_GLFWWindowCount == 0) {
         int success = glfwInit();
-        if (!success) {
-            WEN_CORE_ERROR("Could not initialize GLFW!");
-            return;
-        }
+        WEN_CORE_ASSERT(success, "Could not init glfw!");
         glfwSetErrorCallback(GLFWErrorCallback);
     }
 
-    m_Window = glfwCreateWindow((int)props.width, (int)props.height,
+    {
+        WEN_PROFILE_SCOPE("glfwCreateWindow");
+        m_Window = glfwCreateWindow((int)props.width, (int)props.height,
                                 m_Data.title.c_str(), nullptr, nullptr);
+    }
 
     s_GLFWWindowCount++;
 
@@ -131,6 +135,7 @@ void windowsWindow::init(const windowProps &props) {
 }
 
 void windowsWindow::shutdown() {
+    WEN_PROFILE_FUNCTION();
     glfwDestroyWindow(m_Window);
     --s_GLFWWindowCount;
     if (s_GLFWWindowCount == 0) {
@@ -139,11 +144,13 @@ void windowsWindow::shutdown() {
 }
 
 void windowsWindow::onUpdate() {
+    WEN_PROFILE_FUNCTION();
     glfwPollEvents();
     m_Context->SwapBuffers();
 }
 
 void windowsWindow::setVSync(bool enabled) {
+    WEN_PROFILE_FUNCTION();
     if (enabled) {
         glfwSwapInterval(1);
     } else {
