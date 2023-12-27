@@ -11,8 +11,8 @@ public:
     virtual void init() = 0;
     virtual void setClearColor(const glm::vec4 &color) = 0;
     virtual void clear() = 0;
-    virtual void drawIndexed(
-        const std::shared_ptr<vertexArray> &vertexArray) = 0;
+    virtual void drawIndexed(const std::shared_ptr<vertexArray> &vertexArray,
+                             uint32_t indexCount = 0) = 0;
 
     inline static API getAPI() { return s_API; }
 

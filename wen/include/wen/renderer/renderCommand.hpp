@@ -18,8 +18,8 @@ public:
     static inline void clear() { s_RendererAPI->clear(); }
 
     static inline void drawIndexed(
-        const std::shared_ptr<vertexArray> &vertexArray) {
-        s_RendererAPI->drawIndexed(vertexArray);
+        const Ref<vertexArray> &vertexArray, uint32_t indexCount = 0) {
+        s_RendererAPI->drawIndexed(vertexArray, indexCount);
     }
 
     static void init() { s_RendererAPI->init(); }

@@ -5,11 +5,14 @@
 namespace wen {
 class openglVertexBuffer : public vertexBuffer {
 public:
+    openglVertexBuffer(uint32_t size);
     openglVertexBuffer(float *vertices, uint32_t size);
     virtual ~openglVertexBuffer();
 
     void bind() const override;
     void unbind() const override;
+
+    void setData(const void *data, uint32_t size) override;
 
     void setLayout(const bufferLayout &layout) override { m_Layout = layout; }
 

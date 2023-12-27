@@ -146,10 +146,13 @@ public:
     virtual void bind() const = 0;
     virtual void unbind() const = 0;
 
+    virtual void setData(const void *data, uint32_t size) = 0;
+
     virtual void setLayout(const bufferLayout &layout) = 0;
     virtual const bufferLayout &getLayout() const = 0;
 
-    static vertexBuffer *create(float *vertices, uint32_t size);
+    static Ref<vertexBuffer> create(uint32_t size);
+    static Ref<vertexBuffer> create(float *vertices, uint32_t size);
 };
 
 class indexBuffer {
@@ -160,6 +163,6 @@ public:
     virtual void unbind() const = 0;
 
     virtual uint32_t getCount() const = 0;
-    static indexBuffer *create(uint32_t *indices, uint32_t count);
+    static Ref<indexBuffer> create(uint32_t *indices, uint32_t count);
 };
 }  // namespace wen

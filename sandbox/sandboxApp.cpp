@@ -6,7 +6,7 @@ class snadboxApp : public wen::application {
 public:
     snadboxApp() { 
         // pushLayer(new exampleLayer()); 
-        pushOverlay(new sandbox2d());
+        pushLayer(new sandbox2d());
         // pushLayer(new gameLayer());
     }
 

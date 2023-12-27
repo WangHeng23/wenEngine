@@ -14,16 +14,27 @@ struct quadVertex {
 };
 
 struct renderer2DData {
+    // 一个批次最多绘制10000个四边形
     const uint32_t maxQuads = 10000;
+    // 一个批次最多绘制10000 * 4个顶点
     const uint32_t maxVertices = maxQuads * 4;
+    // 一个批次最多绘制10000 * 6个索引 
     const uint32_t maxIndices = maxQuads * 6;
+
+    // vertexArray
     Ref<vertexArray> quadVertexArray;
+    // vertexBuffer
     Ref<vertexBuffer> quadVertexBuffer;
+    // shader
     Ref<shader> textureShader;
+    // texture
     Ref<texture2D> whiteTexture;
 
+    // 索引总数量
     uint32_t quadIndexCount = 0;
+    // 顶点数据的起始地址  
     quadVertex* quadVertexBufferBase = nullptr;
+    // 顶点数据的当前地址
     quadVertex* quadVertexBufferPtr = nullptr;
 };
 
@@ -33,30 +44,40 @@ void renderer2D::init() {
     WEN_PROFILE_FUNCTION();
     s_Data = new renderer2DData();
     s_Data->quadVertexArray = vertexArray::create();
-    float squareVertices[5 * 4] = {-0.5, -0.5f, 0.0f, 0.0f, 0.0f, 0.5,  -0.5f,
-                                   0.0f, 1.0f,  0.0f, 0.5,  0.5f, 0.0f, 1.0f,
-                                   1.0f, -0.5,  0.5f, 0.0f, 0.0f, 1.0f};
-    Ref<vertexBuffer> squareVB;
-    squareVB.reset(
-        vertexBuffer::create(squareVertices, sizeof(squareVertices)));
-    squareVB->setLayout({
+    s_Data->quadVertexBuffer = vertexBuffer::create(s_Data->maxVertices * sizeof(quadVertex));
+    s_Data->quadVertexBuffer->setLayout({
         {shaderDataType::float3, "a_Position"},
+        {shaderDataType::float4, "a_Color"},
         {shaderDataType::float2, "a_TexCoord"}
     });
-    s_Data->quadVertexArray->addVertexBuffer(squareVB);
+    s_Data->quadVertexArray->addVertexBuffer(s_Data->quadVertexBuffer);
+    s_Data->quadVertexBufferBase = new quadVertex[s_Data->maxVertices];
 
-    uint32_t squareIndices[6] = {0, 1, 2, 2, 3, 0};
-    Ref<indexBuffer> squareIB;
-    squareIB.reset(indexBuffer::create(
-        squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
-    s_Data->quadVertexArray->setIndexBuffer(squareIB);
+    uint32_t* quadIndices = new uint32_t[s_Data->maxIndices];
 
+    uint32_t offset = 0;
+    for (uint32_t i = 0; i < s_Data->maxIndices; i += 6) {
+        quadIndices[i + 0] = offset + 0;
+        quadIndices[i + 1] = offset + 1;
+        quadIndices[i + 2] = offset + 2;
+
+        quadIndices[i + 3] = offset + 2;
+        quadIndices[i + 4] = offset + 3;
+        quadIndices[i + 5] = offset + 0;
+
+        offset += 4;
+    }
+
+    Ref<indexBuffer> quadIndexBuffer = indexBuffer::create(quadIndices, s_Data->maxIndices);
+    s_Data->quadVertexArray->setIndexBuffer(quadIndexBuffer);
+    delete[] quadIndices;
+    
     s_Data->whiteTexture = texture2D::create(1, 1);
     uint32_t whiteTextureData = 0xffffffff;
     s_Data->whiteTexture->setData(&whiteTextureData, sizeof(uint32_t));
 
     s_Data->textureShader =
-        shader::create("sandbox/assets/shaders/GameTexture.glsl");
+        shader::create("sandbox/assets/shaders/Texture.glsl");
     s_Data->textureShader->bind();
     s_Data->textureShader->setInt("u_Texture", 0);
 }
@@ -71,10 +92,21 @@ void renderer2D::beginScene(const orthographicCamera& camera) {
     s_Data->textureShader->bind();
     s_Data->textureShader->setMat4("u_ViewProjection",
                                    camera.getViewProjectionMatrix());
+    s_Data->quadIndexCount = 0;
+    s_Data->quadVertexBufferPtr = s_Data->quadVertexBufferBase;
 }
 
 void renderer2D::endScene() {
     WEN_PROFILE_FUNCTION();
+    uint32_t dataSize = (uint8_t*)s_Data->quadVertexBufferPtr -
+                        (uint8_t*)s_Data->quadVertexBufferBase;
+    s_Data->quadVertexBuffer->setData(s_Data->quadVertexBufferBase, dataSize);
+    flush();
+}
+
+void renderer2D::flush() {
+    WEN_PROFILE_FUNCTION();
+    renderCommand::drawIndexed(s_Data->quadVertexArray, s_Data->quadIndexCount);
 }
 
 void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
@@ -86,14 +118,27 @@ void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
 void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
                           const glm::vec4& color) {
     WEN_PROFILE_FUNCTION();
-    s_Data->textureShader->setFloat4("u_Color", color);
-    s_Data->textureShader->setFloat("u_TilingFactor", 1.0f);
-    s_Data->whiteTexture->bind();
-    s_Data->textureShader->setMat4(
-        "u_Transform", glm::translate(glm::mat4(1.0f), position) *
-                           glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f}));
-    s_Data->quadVertexArray->bind();
-    renderCommand::drawIndexed(s_Data->quadVertexArray);
+    s_Data->quadVertexBufferPtr->position = position;
+    s_Data->quadVertexBufferPtr->color = color;
+    s_Data->quadVertexBufferPtr->texCoord = {0.0f, 0.0f};
+    s_Data->quadVertexBufferPtr++;
+
+    s_Data->quadVertexBufferPtr->position = {position.x + size.x, position.y, position.z};
+    s_Data->quadVertexBufferPtr->color = color;
+    s_Data->quadVertexBufferPtr->texCoord = {1.0f, 0.0f};
+    s_Data->quadVertexBufferPtr++;
+
+    s_Data->quadVertexBufferPtr->position = {position.x + size.x, position.y + size.y, position.z};
+    s_Data->quadVertexBufferPtr->color = color;
+    s_Data->quadVertexBufferPtr->texCoord = {1.0f, 1.0f};
+    s_Data->quadVertexBufferPtr++;
+
+    s_Data->quadVertexBufferPtr->position = {position.x, position.y + size.y, position.z};
+    s_Data->quadVertexBufferPtr->color = color;
+    s_Data->quadVertexBufferPtr->texCoord = {0.0f, 1.0f};
+    s_Data->quadVertexBufferPtr++;
+
+    s_Data->quadIndexCount += 6; 
 }
 
 void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
