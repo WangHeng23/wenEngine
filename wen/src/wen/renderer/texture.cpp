@@ -8,8 +8,7 @@ namespace wen {
 Ref<texture2D> texture2D::create(const std::string &path) {
     switch (renderer::getAPI()) {
         case rendererAPI::API::None:
-            WEN_CORE_ASSERT(false,
-                            "rendererAPI::None is currently not supported!");
+            WEN_CORE_ASSERT(false, "rendererAPI::API::None is currently not supported!");
             return nullptr;
         case rendererAPI::API::OpenGL:
             return CreateRef<openglTexture2D>(path);
@@ -22,8 +21,7 @@ Ref<texture2D> texture2D::create(const std::string &path) {
 Ref<texture2D> texture2D::create(uint32_t w, uint32_t h) {
     switch (renderer::getAPI()) {
         case rendererAPI::API::None:
-            WEN_CORE_ASSERT(false,
-                            "rendererAPI::None is currently not supported!");
+            WEN_CORE_ASSERT(false, "rendererAPI::API::None is currently not supported!");
             return nullptr;
         case rendererAPI::API::OpenGL:
             return CreateRef<openglTexture2D>(w, h);

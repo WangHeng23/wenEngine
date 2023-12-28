@@ -20,5 +20,7 @@ class texture2D : public texture {
 public:
     static Ref<texture2D> create(const std::string& path);
     static Ref<texture2D> create(uint32_t width, uint32_t height);
+
+    virtual bool operator==(const texture2D& other) const = 0;
 };
 }

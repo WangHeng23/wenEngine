@@ -12,8 +12,7 @@ namespace wen {
 Ref<shader> shader::create(const std::string& filepath) {
     switch (renderer::getAPI()) {
         case rendererAPI::API::None:
-            WEN_CORE_ASSERT(false,
-                            "rendererAPI::None is currently not supported!");
+            WEN_CORE_ASSERT(false, "rendererAPI::API::None is currently not supported!");
             return nullptr;
         case rendererAPI::API::OpenGL:
             return std::make_shared<openglShader>(filepath);
@@ -27,8 +26,7 @@ Ref<shader> shader::create(const std::string& name,
                            const std::string& fragmentSrc) {
     switch (renderer::getAPI()) {
         case rendererAPI::API::None:
-            WEN_CORE_ASSERT(false,
-                            "rendererAPI::None is currently not supported!");
+            WEN_CORE_ASSERT(false, "rendererAPI::API::None is currently not supported!");
             return nullptr;
         case rendererAPI::API::OpenGL:
             return std::make_shared<openglShader>(name, vertexSrc, fragmentSrc);
@@ -57,7 +55,7 @@ Ref<shader> shaderLibrary::load(const std::string& filepath) {
 Ref<shader> shaderLibrary::load(const std::string& name,
                                 const std::string& filepath) {
     auto shader = shader::create(filepath);
-    add(shader);
+    add(name, shader);
     return shader;
 }
 

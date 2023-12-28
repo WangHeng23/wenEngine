@@ -16,6 +16,7 @@ public:
     void unbind() const override;
 
     void uploadUniformInt(const std::string& name, int value);
+    void uploadUniformIntArray(const std::string& name, int* values, uint32_t count);
     void uploadUniformFloat(const std::string& name, float value);
     void uploadUniformFloat2(const std::string& name, const glm::vec2& vector);
     void uploadUniformFloat3(const std::string& name, const glm::vec3& vector);
@@ -30,6 +31,8 @@ public:
     void setFloat(const std::string& name, const float value) override;
     void setFloat3(const std::string& name, const glm::vec3& value) override;
     void setFloat4(const std::string& name, const glm::vec4& value) override;
+
+    void setIntArray(const std::string& name, int* values, uint32_t count) override;
 
 private:
     std::string readFile(const std::string& filepath);

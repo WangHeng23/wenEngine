@@ -167,6 +167,12 @@ void openglShader::uploadUniformInt(const std::string &name, int value) {
     glUniform1i(location, value);
 }
 
+void openglShader::uploadUniformIntArray(const std::string &name, int *values,
+                                         uint32_t count) {
+    GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+    glUniform1iv(location, count, values);
+}
+
 void openglShader::uploadUniformFloat(const std::string &name, float value) {
     GLint location = glGetUniformLocation(m_RendererID, name.c_str());
     glUniform1f(location, value);
@@ -225,5 +231,11 @@ void openglShader::setFloat4(const std::string &name, const glm::vec4 &value) {
 void openglShader::setMat4(const std::string &name, const glm::mat4 &value) {
     WEN_PROFILE_FUNCTION();
     uploadUniformMat4(name, value);
+}
+
+void openglShader::setIntArray(const std::string &name, int *values,
+                               uint32_t count) {
+    WEN_PROFILE_FUNCTION();
+    uploadUniformIntArray(name, values, count);
 }
 }  // namespace wen
