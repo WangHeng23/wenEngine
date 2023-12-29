@@ -37,7 +37,9 @@ void sandbox2d::OnUpdate(wen::timeStep ts) {
                                   {0.8f, 0.3f, 0.2f, 1.0f});
         wen::renderer2D::drawQuad({-5.0f, -5.0f, -0.1f}, {10.0f, 10.0f},
                                   m_Texture, 5.0f);
-        wen::renderer2D::drawQuad({-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f},
+        wen::renderer2D::drawQuad({-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f}, m_Texture,
+                                  20.0f);
+        wen::renderer2D::drawQuad({2.0f, 0.0f, 0.1f}, {1.0f, 1.0f}, 45,
                                   m_Texture, 20.0f);
         wen::renderer2D::endScene();
     }

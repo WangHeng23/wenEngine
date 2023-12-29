@@ -21,7 +21,7 @@ struct renderer2DData {
     const uint32_t maxQuads = 10000;
     // 一个批次最多绘制10000 * 4个顶点
     const uint32_t maxVertices = maxQuads * 4;
-    // 一个批次最多绘制10000 * 6个索引 
+    // 一个批次最多绘制10000 * 6个索引
     const uint32_t maxIndices = maxQuads * 6;
     // 最大纹理槽数
     static const uint32_t maxTextureSlots = 32;
@@ -37,13 +37,20 @@ struct renderer2DData {
 
     // 索引总数量
     uint32_t quadIndexCount = 0;
-    // 顶点数据的起始地址  
+    // 顶点数据的起始地址
     quadVertex* quadVertexBufferBase = nullptr;
     // 顶点数据的当前地址
     quadVertex* quadVertexBufferPtr = nullptr;
 
     std::array<Ref<texture2D>, maxTextureSlots> textureSlots;
     uint32_t textureSlotIndex = 1;  // 0 = whiteTexture
+
+    glm::vec4 quadVertexPositions[4] = {
+        {-0.5f, -0.5f, 0.0f, 1.0f},
+        { 0.5f, -0.5f, 0.0f, 1.0f},
+        { 0.5f,  0.5f, 0.0f, 1.0f},
+        {-0.5f,  0.5f, 0.0f, 1.0f},
+    };
 };
 
 static renderer2DData s_Data;
@@ -51,12 +58,13 @@ static renderer2DData s_Data;
 void renderer2D::init() {
     WEN_PROFILE_FUNCTION();
     s_Data.quadVertexArray = vertexArray::create();
-    s_Data.quadVertexBuffer = vertexBuffer::create(s_Data.maxVertices * sizeof(quadVertex));
+    s_Data.quadVertexBuffer =
+        vertexBuffer::create(s_Data.maxVertices * sizeof(quadVertex));
     s_Data.quadVertexBuffer->setLayout({
-        {shaderDataType::float3, "a_Position"},
-        {shaderDataType::float4, "a_Color"},
-        {shaderDataType::float2, "a_TexCoord"},
-        {shaderDataType::float1, "a_TexIndex"},
+        {shaderDataType::float3,     "a_Position"},
+        {shaderDataType::float4,        "a_Color"},
+        {shaderDataType::float2,     "a_TexCoord"},
+        {shaderDataType::float1,     "a_TexIndex"},
         {shaderDataType::float1, "a_TilingFactor"},
     });
     s_Data.quadVertexArray->addVertexBuffer(s_Data.quadVertexBuffer);
@@ -77,10 +85,11 @@ void renderer2D::init() {
         offset += 4;
     }
 
-    Ref<indexBuffer> quadIndexBuffer = indexBuffer::create(quadIndices, s_Data.maxIndices);
+    Ref<indexBuffer> quadIndexBuffer =
+        indexBuffer::create(quadIndices, s_Data.maxIndices);
     s_Data.quadVertexArray->setIndexBuffer(quadIndexBuffer);
     delete[] quadIndices;
-    
+
     s_Data.whiteTexture = texture2D::create(1, 1);
     uint32_t whiteTextureData = 0xffffffff;
     s_Data.whiteTexture->setData(&whiteTextureData, sizeof(uint32_t));
@@ -230,16 +239,6 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
     s_Data.quadVertexBufferPtr++;
 
     s_Data.quadIndexCount += 6;
-
-    // s_Data.textureShader->setFloat4("u_Color", tintColor);
-    // s_Data.textureShader->setFloat("u_TilingFactor", tilingFactor);
-    // texture->bind();
-    // s_Data.textureShader->setMat4(
-    //     "u_Transform", glm::translate(glm::mat4(1.0f), position) *
-    //                        glm::scale(glm::mat4(1.0f), {size.x,
-    //                        size.y, 1.0f}));
-    // s_Data.quadVertexArray->bind();
-    // renderCommand::drawIndexed(s_Data.quadVertexArray);
 }
 
 void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
@@ -274,15 +273,57 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
                           float rotation, const Ref<texture2D>& texture,
                           float tilingFactor, const glm::vec4& tintColor) {
     WEN_PROFILE_FUNCTION();
-    s_Data.textureShader->setFloat4("u_Color", tintColor);
-    s_Data.textureShader->setFloat("u_TilingFactor", tilingFactor);
-    texture->bind();
+    constexpr glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
+    float textureIndex = 0.0f;
+    for (uint32_t i = 1; i < s_Data.textureSlotIndex; i++) {
+        if (*s_Data.textureSlots[i].get() == *texture.get()) {
+            textureIndex = (float)i;
+            break;
+        }
+    }
+    if (textureIndex == 0.0f) {
+        textureIndex = (float)s_Data.textureSlotIndex;
+        s_Data.textureSlots[s_Data.textureSlotIndex] = texture;
+        s_Data.textureSlotIndex++;
+    }
+
     glm::mat4 transform =
         glm::translate(glm::mat4(1.0f), position) *
         glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
         glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
-    s_Data.textureShader->setMat4("u_Transform", transform);
-    s_Data.quadVertexArray->bind();
-    renderCommand::drawIndexed(s_Data.quadVertexArray);
+
+    s_Data.quadVertexBufferPtr->position =
+        transform * s_Data.quadVertexPositions[0];
+    s_Data.quadVertexBufferPtr->color = color;
+    s_Data.quadVertexBufferPtr->texCoord = {0.0f, 0.0f};
+    s_Data.quadVertexBufferPtr->texIndex = textureIndex;
+    s_Data.quadVertexBufferPtr->tilingFactor = tilingFactor;
+    s_Data.quadVertexBufferPtr++;
+
+    s_Data.quadVertexBufferPtr->position =
+        transform * s_Data.quadVertexPositions[1];
+    s_Data.quadVertexBufferPtr->color = color;
+    s_Data.quadVertexBufferPtr->texCoord = {1.0f, 0.0f};
+    s_Data.quadVertexBufferPtr->texIndex = textureIndex;
+    s_Data.quadVertexBufferPtr->tilingFactor = tilingFactor;
+    s_Data.quadVertexBufferPtr++;
+
+    s_Data.quadVertexBufferPtr->position =
+        transform * s_Data.quadVertexPositions[2];
+    s_Data.quadVertexBufferPtr->color = color;
+    s_Data.quadVertexBufferPtr->texCoord = {1.0f, 1.0f};
+    s_Data.quadVertexBufferPtr->texIndex = textureIndex;
+    s_Data.quadVertexBufferPtr->tilingFactor = tilingFactor;
+    s_Data.quadVertexBufferPtr++;
+
+    s_Data.quadVertexBufferPtr->position =
+        transform * s_Data.quadVertexPositions[3];
+    s_Data.quadVertexBufferPtr->color = color;
+    s_Data.quadVertexBufferPtr->texCoord = {0.0f, 1.0f};
+    s_Data.quadVertexBufferPtr->texIndex = textureIndex;
+    s_Data.quadVertexBufferPtr->tilingFactor = tilingFactor;
+    s_Data.quadVertexBufferPtr++;
+
+    s_Data.quadIndexCount += 6;
 }
 }  // namespace wen
