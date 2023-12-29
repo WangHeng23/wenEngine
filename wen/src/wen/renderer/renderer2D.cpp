@@ -17,29 +17,18 @@ struct quadVertex {
 };
 
 struct renderer2DData {
-    // 一个批次最多绘制10000个四边形
-    const uint32_t maxQuads = 10000;
-    // 一个批次最多绘制10000 * 4个顶点
+    const uint32_t maxQuads = 20000;
     const uint32_t maxVertices = maxQuads * 4;
-    // 一个批次最多绘制10000 * 6个索引
     const uint32_t maxIndices = maxQuads * 6;
-    // 最大纹理槽数
     static const uint32_t maxTextureSlots = 32;
 
-    // vertexArray
     Ref<vertexArray> quadVertexArray;
-    // vertexBuffer
     Ref<vertexBuffer> quadVertexBuffer;
-    // shader
     Ref<shader> textureShader;
-    // texture
     Ref<texture2D> whiteTexture;
 
-    // 索引总数量
     uint32_t quadIndexCount = 0;
-    // 顶点数据的起始地址
     quadVertex* quadVertexBufferBase = nullptr;
-    // 顶点数据的当前地址
     quadVertex* quadVertexBufferPtr = nullptr;
 
     std::array<Ref<texture2D>, maxTextureSlots> textureSlots;
@@ -51,6 +40,8 @@ struct renderer2DData {
         { 0.5f,  0.5f, 0.0f, 1.0f},
         {-0.5f,  0.5f, 0.0f, 1.0f},
     };
+
+    renderer2D::statistics stats;
 };
 
 static renderer2DData s_Data;
@@ -95,8 +86,8 @@ void renderer2D::init() {
     s_Data.whiteTexture->setData(&whiteTextureData, sizeof(uint32_t));
     s_Data.textureSlots[0] = s_Data.whiteTexture;
 
-    s_Data.textureShader =
-        shader::create("sandbox/assets/shaders/Texture.glsl");
+    s_Data.textureShader = shader::create(
+        "D:/Program/game_engine/wenEngine/sandbox/assets/shaders/Texture.glsl");
     int samplers[s_Data.maxTextureSlots] = {0};
     for (int i = 0; i < s_Data.maxTextureSlots; i++) {
         samplers[i] = i;
@@ -108,7 +99,10 @@ void renderer2D::init() {
 
 void renderer2D::shutdown() {
     WEN_PROFILE_FUNCTION();
-    delete[] s_Data.quadVertexBufferBase;
+    s_Data.quadIndexCount = 0;
+    s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+    s_Data.textureSlotIndex = 1;
+    // delete[] s_Data.quadVertexBufferBase;
 }
 
 void renderer2D::beginScene(const orthographicCamera& camera) {
@@ -118,6 +112,7 @@ void renderer2D::beginScene(const orthographicCamera& camera) {
                                   camera.getViewProjectionMatrix());
     s_Data.quadIndexCount = 0;
     s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+    s_Data.textureSlotIndex = 1;
 }
 
 void renderer2D::endScene() {
@@ -134,6 +129,15 @@ void renderer2D::flush() {
         s_Data.textureSlots[i]->bind(i);
     }
     renderCommand::drawIndexed(s_Data.quadVertexArray, s_Data.quadIndexCount);
+    s_Data.stats.drawCalls++;
+}
+
+void renderer2D::FlushAndReset() {
+    WEN_PROFILE_FUNCTION();
+    endScene();
+    s_Data.quadIndexCount = 0;
+    s_Data.quadVertexBufferPtr = s_Data.quadVertexBufferBase;
+    s_Data.textureSlotIndex = 1;
 }
 
 void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
@@ -145,6 +149,9 @@ void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
 void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
                           const glm::vec4& color) {
     WEN_PROFILE_FUNCTION();
+    if (s_Data.quadIndexCount >= s_Data.maxIndices) {
+        FlushAndReset();
+    }
     const float textureIndex = 0.0f;  // white texture
     const float tilingFactor = 1.0f;
 
@@ -180,6 +187,7 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
     s_Data.quadVertexBufferPtr++;
 
     s_Data.quadIndexCount += 6;
+    s_Data.stats.quadCount++;
 }
 
 void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
@@ -194,6 +202,9 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
                           const Ref<texture2D>& texture, float tilingFactor,
                           const glm::vec4& tintColor) {
     WEN_PROFILE_FUNCTION();
+    if (s_Data.quadIndexCount >= s_Data.maxIndices) {
+        FlushAndReset();
+    }
     constexpr glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
     float textureIndex = 0.0f;
     for (uint32_t i = 1; i < s_Data.textureSlotIndex; i++) {
@@ -239,16 +250,19 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
     s_Data.quadVertexBufferPtr++;
 
     s_Data.quadIndexCount += 6;
+    s_Data.stats.quadCount++;
 }
 
-void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
-                          float rotation, const glm::vec4& color) {
+void renderer2D::drawRotatedQuad(const glm::vec2& position,
+                                 const glm::vec2& size, float rotation,
+                                 const glm::vec4& color) {
     WEN_PROFILE_FUNCTION();
-    drawQuad({position.x, position.y, 0.0f}, size, rotation, color);
+    drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, color);
 }
 
-void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
-                          float rotation, const glm::vec4& color) {
+void renderer2D::drawRotatedQuad(const glm::vec3& position,
+                                 const glm::vec2& size, float rotation,
+                                 const glm::vec4& color) {
     WEN_PROFILE_FUNCTION();
     s_Data.textureShader->setFloat4("u_Color", color);
     s_Data.textureShader->setFloat("u_TilingFactor", 1.0f);
@@ -261,18 +275,25 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
     renderCommand::drawIndexed(s_Data.quadVertexArray);
 }
 
-void renderer2D::drawQuad(const glm::vec2& position, const glm::vec2& size,
-                          float rotation, const Ref<texture2D>& texture,
-                          float tilingFactor, const glm::vec4& tintColor) {
+void renderer2D::drawRotatedQuad(const glm::vec2& position,
+                                 const glm::vec2& size, float rotation,
+                                 const Ref<texture2D>& texture,
+                                 float tilingFactor,
+                                 const glm::vec4& tintColor) {
     WEN_PROFILE_FUNCTION();
-    drawQuad({position.x, position.y, 0.0f}, size, rotation, texture,
-             tilingFactor, tintColor);
+    drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, texture,
+                    tilingFactor, tintColor);
 }
 
-void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
-                          float rotation, const Ref<texture2D>& texture,
-                          float tilingFactor, const glm::vec4& tintColor) {
+void renderer2D::drawRotatedQuad(const glm::vec3& position,
+                                 const glm::vec2& size, float rotation,
+                                 const Ref<texture2D>& texture,
+                                 float tilingFactor,
+                                 const glm::vec4& tintColor) {
     WEN_PROFILE_FUNCTION();
+    if (s_Data.quadIndexCount >= s_Data.maxIndices) {
+        FlushAndReset();
+    }
     constexpr glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
     float textureIndex = 0.0f;
     for (uint32_t i = 1; i < s_Data.textureSlotIndex; i++) {
@@ -325,5 +346,14 @@ void renderer2D::drawQuad(const glm::vec3& position, const glm::vec2& size,
     s_Data.quadVertexBufferPtr++;
 
     s_Data.quadIndexCount += 6;
+    s_Data.stats.quadCount++;
+}
+
+void renderer2D::resetStats() {
+    memset(&s_Data.stats, 0, sizeof(statistics));
+}
+
+renderer2D::statistics renderer2D::getStats() {
+    return s_Data.stats;
 }
 }  // namespace wen

@@ -102,10 +102,10 @@ void level::OnRender() {
     wen::renderer2D::drawQuad({playerPos.x, -34.0f}, {50.0f, 50.0f}, color);
 
     for (auto& pillar : m_Pillars) {
-        wen::renderer2D::drawQuad(pillar.topPosition, pillar.topScale,
+        wen::renderer2D::drawRotatedQuad(pillar.topPosition, pillar.topScale,
                                   glm::radians(180.0f), m_TriangleTexture, 1.0f,
                                   color);
-        wen::renderer2D::drawQuad(pillar.bottomPosition, pillar.bottomScale,
+        wen::renderer2D::drawRotatedQuad(pillar.bottomPosition, pillar.bottomScale,
                                   0.0f, m_TriangleTexture, 1.0f, color);
     }
     m_Player.OnRender();

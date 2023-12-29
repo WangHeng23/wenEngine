@@ -68,7 +68,7 @@ void player::OnUpdate(wen::timeStep ts) {
 
 void player::OnRender() {
     m_ParticleSystem.OnRender();
-    renderer2D::drawQuad({m_Position.x, m_Position.y, 0.5f}, {1.0f, 1.3f},
+    renderer2D::drawRotatedQuad({m_Position.x, m_Position.y, 0.5f}, {1.0f, 1.3f},
                          glm::radians(getRotation()), m_ShipTexture);
 }
 
